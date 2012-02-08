@@ -59,17 +59,30 @@
     if (_viewControllers.count == 0 || selectedControllerIndex >= _viewControllers.count) {
         return;
     }
+    
+    // Send hide messages to the current view controller
+    if (_containerView.subviews.count > 0 && _selectedControllerIndex < _viewControllers.count) {
+        UIViewController *controllerBeingHidden = [_viewControllers objectAtIndex:_selectedControllerIndex];
+        [controllerBeingHidden viewWillDisappear:NO];
+        [controllerBeingHidden viewDidDisappear:NO];
+    }
+    
     _selectedControllerIndex = selectedControllerIndex;
     
+    UIViewController *selectedViewController = [_viewControllers objectAtIndex:selectedControllerIndex];
+    
     UIView *currentChildView = (_containerView.subviews.count > 0) ? [_containerView.subviews objectAtIndex:0] : nil;
-    UIView *viewToShow = [[_viewControllers objectAtIndex:selectedControllerIndex] view];
+    UIView *viewToShow = selectedViewController.view;
     
     if (currentChildView != viewToShow) {
         [currentChildView removeFromSuperview];
 
         viewToShow.frame = _containerView.bounds;
         viewToShow.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [selectedViewController viewWillAppear:NO];
         [_containerView addSubview:viewToShow];
+        [selectedViewController viewDidAppear:NO];
     }
     
     [_tabButtons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger index, BOOL *stop) {
