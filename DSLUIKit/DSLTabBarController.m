@@ -199,6 +199,23 @@
     }];
 }
 
+//- (void)viewWillDisappear:(BOOL)animated {
+//    [super viewWillDisappear:animated];
+//    
+//    CGRect newTabFrame = _tabView.frame;
+//    newTabFrame.origin.y = self.view.bounds.size.height;
+//    
+//    if (animated) {
+//        [UIView animateWithDuration:0.25f delay:0.0f options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+//            _tabView.frame = newTabFrame;
+//        } completion:^(BOOL finished) {
+//        }];
+//    }
+//    else {
+//        _tabView.frame = newTabFrame;
+//    }
+//}
+
 
 #pragma mark -
 
@@ -261,6 +278,26 @@
                 [navigationController popToRootViewControllerAnimated:YES];
             }
         }
+    }
+}
+
+@end
+
+
+@implementation UIViewController (DSLTabBarController)
+
+- (void)dsl_presentModalViewController:(UIViewController*)controller animated:(BOOL)animated {
+    // Check the responder chain for a containing tab bar controller
+    UIResponder *responder = self;
+    while (responder != nil && ![responder isKindOfClass:[DSLTabBarController class]]) {
+        responder = [responder nextResponder];
+    }
+    
+    if (responder != nil) {
+        [(UIViewController *)responder presentModalViewController:controller animated:YES];
+    }
+    else {
+        [self presentModalViewController:controller animated:YES];
     }
 }
 
