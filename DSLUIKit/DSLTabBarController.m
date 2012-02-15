@@ -287,17 +287,13 @@
 @implementation UIViewController (DSLTabBarController)
 
 - (void)dsl_presentModalViewController:(UIViewController*)controller animated:(BOOL)animated {
-    // Check the responder chain for a containing tab bar controller
-    UIResponder *responder = self;
-    while (responder != nil && ![responder isKindOfClass:[DSLTabBarController class]]) {
-        responder = [responder nextResponder];
-    }
-    
-    if (responder != nil) {
-        [(UIViewController *)responder presentModalViewController:controller animated:YES];
+    id rootViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+
+    if ([rootViewController isKindOfClass:[DSLTabBarController class]]) {
+        [rootViewController presentModalViewController:controller animated:animated];
     }
     else {
-        [self presentModalViewController:controller animated:YES];
+        [self presentModalViewController:controller animated:animated];
     }
 }
 
