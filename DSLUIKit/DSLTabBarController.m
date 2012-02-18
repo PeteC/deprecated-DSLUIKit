@@ -232,6 +232,7 @@
         button.adjustsImageWhenHighlighted = NO;
         [button setImage:controller.tabBarItem.image forState:UIControlStateNormal];
         [button setImage:controller.tabBarItem.dsl_selectedImage forState:UIControlStateSelected];
+        [button setImage:controller.tabBarItem.dsl_selectedImage forState:UIControlStateSelected | UIControlStateHighlighted];
         [button addTarget:self action:@selector(didTapTabBarButton:) forControlEvents:UIControlEventTouchUpInside];
         
         [_tabView addSubview:button];
