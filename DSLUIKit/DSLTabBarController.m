@@ -45,6 +45,8 @@
     __strong NSArray *_tabButtons;
     __strong UIView *_tabView;
     __strong UIView *_containerView;
+    __strong UIViewController *_viewControllerThatHidTabBar;
+    BOOL _showingViewControllerThatHidTabBar;
 }
 
 @synthesize selectedControllerIndex = _selectedControllerIndex;
@@ -123,6 +125,7 @@
 		// Initialise properties
         self.tabBarHeight = 49;
         self.viewControllers = viewControllers;
+        _showingViewControllerThatHidTabBar = NO;
 	}
 	
 	return self;
@@ -135,6 +138,14 @@
     [super loadView];
     
     CGRect frame = CGRectZero;
+    frame.size.width = self.view.bounds.size.width;
+    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
+    _containerView = [[UIView alloc] initWithFrame:frame];
+    _containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _containerView.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:_containerView];
+    
+    frame = CGRectZero;
     frame.size.height = self.tabBarHeight;
     frame.origin.y = self.view.bounds.size.height - frame.size.height;
     frame.size.width = self.view.bounds.size.width;
@@ -142,14 +153,6 @@
     _tabView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     _tabView.backgroundColor = [UIColor grayColor];
     [self.view addSubview:_tabView];
-    
-    frame = CGRectZero;
-    frame.size.width = self.view.bounds.size.width;
-    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
-    _containerView = [[UIView alloc] initWithFrame:frame];
-    _containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    _containerView.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:_containerView];
     
     if (self.tabBarBackgroundImage != nil) {
         UIImageView *imageView = [[UIImageView alloc] initWithImage:self.tabBarBackgroundImage];
@@ -159,6 +162,7 @@
         [_tabView addSubview:imageView];
     }
     
+    [self.view bringSubviewToFront:_tabView];
     [self updateTabBar];
 }
 
@@ -199,22 +203,57 @@
     }];
 }
 
-//- (void)viewWillDisappear:(BOOL)animated {
-//    [super viewWillDisappear:animated];
-//    
-//    CGRect newTabFrame = _tabView.frame;
-//    newTabFrame.origin.y = self.view.bounds.size.height;
-//    
-//    if (animated) {
-//        [UIView animateWithDuration:0.25f delay:0.0f options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-//            _tabView.frame = newTabFrame;
-//        } completion:^(BOOL finished) {
-//        }];
-//    }
-//    else {
-//        _tabView.frame = newTabFrame;
-//    }
-//}
+
+#pragma mark - UINavigationViewController methods
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if (_viewControllerThatHidTabBar == nil) {
+        // Check of this new view controller hides the tab bar
+        if (viewController.hidesBottomBarWhenPushed) {
+            // Hide the tab and remember the controller that hid it
+            _viewControllerThatHidTabBar = viewController;
+            _showingViewControllerThatHidTabBar = YES;
+            
+            CGRect frame = _containerView.frame;
+            frame.size.height += _tabView.bounds.size.height;
+            _containerView.frame = frame;
+
+            [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
+                CGRect tabFrame = _tabView.frame;
+                tabFrame.origin.x -= tabFrame.size.width;
+                _tabView.frame = tabFrame;
+            } completion:^(BOOL finished) {
+            }];
+        }
+    }
+    else {
+        if (viewController == _viewControllerThatHidTabBar) {
+            // We're now going to show the controller that hid the tab bar. Note this so we can re-show the tab bar if it gets popped off the stack
+            _showingViewControllerThatHidTabBar = YES;
+        }
+        else {
+            if ([navigationController.viewControllers indexOfObject:_viewControllerThatHidTabBar] == NSNotFound) {
+                // The view that hid the tab bar is no longer in the navigation controller's stack so show the tab bar again
+                _viewControllerThatHidTabBar = nil;
+                _showingViewControllerThatHidTabBar = NO;
+                
+                [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+                    CGRect frame = _tabView.frame;
+                    frame.origin.y = self.view.bounds.size.height - frame.size.height;
+                    frame.origin.x = 0;
+                    _tabView.frame = frame;
+                } completion:^(BOOL finished) {
+                    CGRect frame = _containerView.frame;
+                    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
+                    _containerView.frame = frame;
+                }];
+            }
+            else {
+                _showingViewControllerThatHidTabBar = NO;
+            }
+        }
+    }
+}
 
 
 #pragma mark -
