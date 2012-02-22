@@ -31,6 +31,7 @@
 
 
 #import "DSLTabBarController.h"
+#import <QuartzCore/QuartzCore.h>
 
 
 @interface DSLTabBarController ()<UINavigationControllerDelegate>
@@ -215,8 +216,18 @@
             _showingViewControllerThatHidTabBar = YES;
             
             CGRect frame = _containerView.frame;
-            frame.size.height += _tabView.bounds.size.height;
+            frame.size.height += self.tabBarHeight;
             _containerView.frame = frame;
+
+            if (navigationController.viewControllers.count > 1) {
+                // Resize the view being hidden after the current run loop has finished
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIViewController *controllerBeingHidden = [navigationController.viewControllers objectAtIndex:navigationController.viewControllers.count - 2];
+                    CGRect frame = controllerBeingHidden.view.frame;
+                    frame.size.height -= self.tabBarHeight;
+                    controllerBeingHidden.view.frame = frame;
+                });
+            }
 
             [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
                 CGRect tabFrame = _tabView.frame;
@@ -237,6 +248,15 @@
                 _viewControllerThatHidTabBar = nil;
                 _showingViewControllerThatHidTabBar = NO;
                 
+                // Resize the view being show after the framework has made it too big
+                double delayInSeconds = 0.001;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                    CGRect frame = viewController.view.frame;
+                    frame.size.height -= self.tabBarHeight;
+                    viewController.view.frame = frame;
+                });
+
                 [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
                     CGRect frame = _tabView.frame;
                     frame.origin.y = self.view.bounds.size.height - frame.size.height;
