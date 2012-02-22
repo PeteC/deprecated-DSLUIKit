@@ -139,7 +139,7 @@
     
     CGRect frame = CGRectZero;
     frame.size.width = self.view.bounds.size.width;
-    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
+    frame.size.height = self.view.bounds.size.height - self.tabBarHeight;
     _containerView = [[UIView alloc] initWithFrame:frame];
     _containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _containerView.backgroundColor = [UIColor blackColor];
