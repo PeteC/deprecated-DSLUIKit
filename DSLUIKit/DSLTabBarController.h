@@ -43,3 +43,10 @@
 - (id)initWithViewControllers:(NSArray*)viewControllers;
 
 @end
+
+
+@interface UIViewController (DSLTabBarController)
+
+- (void)dsl_presentModalViewController:(UIViewController*)controller animated:(BOOL)animated;
+
+@end

@@ -31,6 +31,7 @@
 
 
 #import "DSLTabBarController.h"
+#import <QuartzCore/QuartzCore.h>
 
 
 @interface DSLTabBarController ()<UINavigationControllerDelegate>
@@ -45,6 +46,8 @@
     __strong NSArray *_tabButtons;
     __strong UIView *_tabView;
     __strong UIView *_containerView;
+    __strong UIViewController *_viewControllerThatHidTabBar;
+    BOOL _showingViewControllerThatHidTabBar;
 }
 
 @synthesize selectedControllerIndex = _selectedControllerIndex;
@@ -59,17 +62,30 @@
     if (_viewControllers.count == 0 || selectedControllerIndex >= _viewControllers.count) {
         return;
     }
+    
+    // Send hide messages to the current view controller
+    if (_containerView.subviews.count > 0 && _selectedControllerIndex < _viewControllers.count) {
+        UIViewController *controllerBeingHidden = [_viewControllers objectAtIndex:_selectedControllerIndex];
+        [controllerBeingHidden viewWillDisappear:NO];
+        [controllerBeingHidden viewDidDisappear:NO];
+    }
+    
     _selectedControllerIndex = selectedControllerIndex;
     
+    UIViewController *selectedViewController = [_viewControllers objectAtIndex:selectedControllerIndex];
+    
     UIView *currentChildView = (_containerView.subviews.count > 0) ? [_containerView.subviews objectAtIndex:0] : nil;
-    UIView *viewToShow = [[_viewControllers objectAtIndex:selectedControllerIndex] view];
+    UIView *viewToShow = selectedViewController.view;
     
     if (currentChildView != viewToShow) {
         [currentChildView removeFromSuperview];
 
         viewToShow.frame = _containerView.bounds;
         viewToShow.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        
+        [selectedViewController viewWillAppear:NO];
         [_containerView addSubview:viewToShow];
+        [selectedViewController viewDidAppear:NO];
     }
     
     [_tabButtons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger index, BOOL *stop) {
@@ -110,6 +126,7 @@
 		// Initialise properties
         self.tabBarHeight = 49;
         self.viewControllers = viewControllers;
+        _showingViewControllerThatHidTabBar = NO;
 	}
 	
 	return self;
@@ -122,6 +139,14 @@
     [super loadView];
     
     CGRect frame = CGRectZero;
+    frame.size.width = self.view.bounds.size.width;
+    frame.size.height = self.view.bounds.size.height - self.tabBarHeight;
+    _containerView = [[UIView alloc] initWithFrame:frame];
+    _containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _containerView.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:_containerView];
+    
+    frame = CGRectZero;
     frame.size.height = self.tabBarHeight;
     frame.origin.y = self.view.bounds.size.height - frame.size.height;
     frame.size.width = self.view.bounds.size.width;
@@ -129,14 +154,6 @@
     _tabView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     _tabView.backgroundColor = [UIColor grayColor];
     [self.view addSubview:_tabView];
-    
-    frame = CGRectZero;
-    frame.size.width = self.view.bounds.size.width;
-    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
-    _containerView = [[UIView alloc] initWithFrame:frame];
-    _containerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    _containerView.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:_containerView];
     
     if (self.tabBarBackgroundImage != nil) {
         UIImageView *imageView = [[UIImageView alloc] initWithImage:self.tabBarBackgroundImage];
@@ -146,6 +163,7 @@
         [_tabView addSubview:imageView];
     }
     
+    [self.view bringSubviewToFront:_tabView];
     [self updateTabBar];
 }
 
@@ -187,6 +205,77 @@
 }
 
 
+#pragma mark - UINavigationViewController methods
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if (_viewControllerThatHidTabBar == nil) {
+        // Check of this new view controller hides the tab bar
+        if (viewController.hidesBottomBarWhenPushed) {
+            // Hide the tab and remember the controller that hid it
+            _viewControllerThatHidTabBar = viewController;
+            _showingViewControllerThatHidTabBar = YES;
+            
+            CGRect frame = _containerView.frame;
+            frame.size.height += self.tabBarHeight;
+            _containerView.frame = frame;
+
+            if (navigationController.viewControllers.count > 1) {
+                // Resize the view being hidden after the current run loop has finished
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIViewController *controllerBeingHidden = [navigationController.viewControllers objectAtIndex:navigationController.viewControllers.count - 2];
+                    CGRect frame = controllerBeingHidden.view.frame;
+                    frame.size.height -= self.tabBarHeight;
+                    controllerBeingHidden.view.frame = frame;
+                });
+            }
+
+            [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
+                CGRect tabFrame = _tabView.frame;
+                tabFrame.origin.x -= tabFrame.size.width;
+                _tabView.frame = tabFrame;
+            } completion:^(BOOL finished) {
+            }];
+        }
+    }
+    else {
+        if (viewController == _viewControllerThatHidTabBar) {
+            // We're now going to show the controller that hid the tab bar. Note this so we can re-show the tab bar if it gets popped off the stack
+            _showingViewControllerThatHidTabBar = YES;
+        }
+        else {
+            if ([navigationController.viewControllers indexOfObject:_viewControllerThatHidTabBar] == NSNotFound) {
+                // The view that hid the tab bar is no longer in the navigation controller's stack so show the tab bar again
+                _viewControllerThatHidTabBar = nil;
+                _showingViewControllerThatHidTabBar = NO;
+                
+                // Resize the view being show after the framework has made it too big
+                double delayInSeconds = 0.001;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                    CGRect frame = viewController.view.frame;
+                    frame.size.height -= self.tabBarHeight;
+                    viewController.view.frame = frame;
+                });
+
+                [UIView animateWithDuration:0.35 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+                    CGRect frame = _tabView.frame;
+                    frame.origin.y = self.view.bounds.size.height - frame.size.height;
+                    frame.origin.x = 0;
+                    _tabView.frame = frame;
+                } completion:^(BOOL finished) {
+                    CGRect frame = _containerView.frame;
+                    frame.size.height = self.view.bounds.size.height - _tabView.bounds.size.height;
+                    _containerView.frame = frame;
+                }];
+            }
+            else {
+                _showingViewControllerThatHidTabBar = NO;
+            }
+        }
+    }
+}
+
+
 #pragma mark -
 
 - (void)updateTabBar {
@@ -202,6 +291,7 @@
         button.adjustsImageWhenHighlighted = NO;
         [button setImage:controller.tabBarItem.image forState:UIControlStateNormal];
         [button setImage:controller.tabBarItem.dsl_selectedImage forState:UIControlStateSelected];
+        [button setImage:controller.tabBarItem.dsl_selectedImage forState:UIControlStateSelected | UIControlStateHighlighted];
         [button addTarget:self action:@selector(didTapTabBarButton:) forControlEvents:UIControlEventTouchUpInside];
         
         [_tabView addSubview:button];
@@ -248,6 +338,22 @@
                 [navigationController popToRootViewControllerAnimated:YES];
             }
         }
+    }
+}
+
+@end
+
+
+@implementation UIViewController (DSLTabBarController)
+
+- (void)dsl_presentModalViewController:(UIViewController*)controller animated:(BOOL)animated {
+    id rootViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+
+    if ([rootViewController isKindOfClass:[DSLTabBarController class]]) {
+        [rootViewController presentModalViewController:controller animated:animated];
+    }
+    else {
+        [self presentModalViewController:controller animated:animated];
     }
 }
 
