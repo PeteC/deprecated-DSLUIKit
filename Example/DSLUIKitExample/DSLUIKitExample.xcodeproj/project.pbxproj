@@ -32,6 +32,10 @@
 		B50F857A14D56CC600C56215 /* tabbar-item02-selected.png in Resources */ = {isa = PBXBuildFile; fileRef = B50F857614D56CC600C56215 /* tabbar-item02-selected.png */; };
 		B50F857E14D56EFD00C56215 /* tabbar-item01-selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B50F857C14D56EFD00C56215 /* tabbar-item01-selected@2x.png */; };
 		B50F857F14D56EFD00C56215 /* tabbar-item02-selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B50F857D14D56EFD00C56215 /* tabbar-item02-selected@2x.png */; };
+		B587D316155B12B100987F5F /* UILabel+DSLExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = B587D30F155B12B100987F5F /* UILabel+DSLExtras.m */; };
+		B587D317155B12B100987F5F /* UINib+DSLExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = B587D311155B12B100987F5F /* UINib+DSLExtras.m */; };
+		B587D318155B12B100987F5F /* UIView+DSLExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = B587D313155B12B100987F5F /* UIView+DSLExtras.m */; };
+		B587D319155B12B100987F5F /* UIViewController+DSLExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = B587D315155B12B100987F5F /* UIViewController+DSLExtras.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -69,6 +73,14 @@
 		B50F857614D56CC600C56215 /* tabbar-item02-selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tabbar-item02-selected.png"; sourceTree = "<group>"; };
 		B50F857C14D56EFD00C56215 /* tabbar-item01-selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tabbar-item01-selected@2x.png"; sourceTree = "<group>"; };
 		B50F857D14D56EFD00C56215 /* tabbar-item02-selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tabbar-item02-selected@2x.png"; sourceTree = "<group>"; };
+		B587D30E155B12B100987F5F /* UILabel+DSLExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UILabel+DSLExtras.h"; sourceTree = "<group>"; };
+		B587D30F155B12B100987F5F /* UILabel+DSLExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UILabel+DSLExtras.m"; sourceTree = "<group>"; };
+		B587D310155B12B100987F5F /* UINib+DSLExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UINib+DSLExtras.h"; sourceTree = "<group>"; };
+		B587D311155B12B100987F5F /* UINib+DSLExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UINib+DSLExtras.m"; sourceTree = "<group>"; };
+		B587D312155B12B100987F5F /* UIView+DSLExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+DSLExtras.h"; sourceTree = "<group>"; };
+		B587D313155B12B100987F5F /* UIView+DSLExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+DSLExtras.m"; sourceTree = "<group>"; };
+		B587D314155B12B100987F5F /* UIViewController+DSLExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+DSLExtras.h"; sourceTree = "<group>"; };
+		B587D315155B12B100987F5F /* UIViewController+DSLExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+DSLExtras.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,8 +160,16 @@
 				B50F854814D54EB100C56215 /* DSLNavigationController.xib */,
 				B50F854914D54EB100C56215 /* DSLTabBarController.h */,
 				B50F854A14D54EB100C56215 /* DSLTabBarController.m */,
+				B587D30E155B12B100987F5F /* UILabel+DSLExtras.h */,
+				B587D30F155B12B100987F5F /* UILabel+DSLExtras.m */,
+				B587D310155B12B100987F5F /* UINib+DSLExtras.h */,
+				B587D311155B12B100987F5F /* UINib+DSLExtras.m */,
 				B50F854B14D54EB100C56215 /* UITabBarItem+DSLExtras.h */,
 				B50F854C14D54EB100C56215 /* UITabBarItem+DSLExtras.m */,
+				B587D312155B12B100987F5F /* UIView+DSLExtras.h */,
+				B587D313155B12B100987F5F /* UIView+DSLExtras.m */,
+				B587D314155B12B100987F5F /* UIViewController+DSLExtras.h */,
+				B587D315155B12B100987F5F /* UIViewController+DSLExtras.m */,
 			);
 			name = DSLUIKit;
 			path = ../../../DSLUIKit;
@@ -256,6 +276,10 @@
 				B50F854E14D54EB100C56215 /* DSLNavigationController.m in Sources */,
 				B50F855014D54EB100C56215 /* DSLTabBarController.m in Sources */,
 				B50F855114D54EB100C56215 /* UITabBarItem+DSLExtras.m in Sources */,
+				B587D316155B12B100987F5F /* UILabel+DSLExtras.m in Sources */,
+				B587D317155B12B100987F5F /* UINib+DSLExtras.m in Sources */,
+				B587D318155B12B100987F5F /* UIView+DSLExtras.m in Sources */,
+				B587D319155B12B100987F5F /* UIViewController+DSLExtras.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,8 +355,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DSLUIKitExample/DSLUIKitExample-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = "DSLUIKitExample/DSLUIKitExample-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -342,8 +368,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "DSLUIKitExample/DSLUIKitExample-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = "DSLUIKitExample/DSLUIKitExample-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
